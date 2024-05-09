@@ -1,50 +1,41 @@
 import { Link } from "react-router-dom";
-import {
-  GridColDef,
-  GridToolbar,
-    
-} from "@mui/x-data-grid";
+import { GridColDef, GridToolbar, DataGrid } from "@mui/x-data-grid";
 import "./dataTable.scss";
-import { DataGrid } from "@mui/x-data-grid"
 
-type Props = {
-
-  columns:GridColDef[];
-  rows:object[];
-  slug:string;
+interface DataTableProps {
+  columns: GridColDef[];
+  rows: object[];
+  slug: string;
+  onDeleteRow: (id: number) => void; // Typing for delete handler
 }
 
-const dataTable = (props:Props) => {
-
+const DataTable: React.FC<DataTableProps> = ({ columns, rows, slug, onDeleteRow }) => {
   const handleDelete = (id: number) => {
-    //delete the item
-    
+    onDeleteRow(id); // Call the parent-provided delete function with the ID
   };
 
   const actionColumn: GridColDef = {
     field: "action",
     headerName: "Action",
     width: 200,
-    renderCell: (params) => {
-      return (
-        <div className="action">
-          <Link to={`/${props.slug}/${params.row.id}`}>
-            <img src="/view.svg" alt="" />
-          </Link>
-          <div className="delete" onClick={() => handleDelete(params.row.id)}>
-            <img src="/delete.svg" alt="" />
-          </div>
+    renderCell: (params) => (
+      <div className="action">
+        <Link to={`/${slug}/${params.row.id}`}>
+          <img src="/view.svg" alt="View" />
+        </Link>
+        <div className="delete" onClick={() => handleDelete(params.row.id)}> {/* Use handleDelete */}
+          <img src="/delete.svg" alt="Delete" />
         </div>
-      );
-    },
+      </div>
+    ),
   };
 
-    return (
+  return (
     <div className="dataTable">
-       <DataGrid
-       className="dataGrid"
-        rows={props.rows}
-        columns={[...props.columns, actionColumn]}
+      <DataGrid
+        className="dataGrid"
+        rows={rows}
+        columns={[...columns, actionColumn]} // Include the action column
         initialState={{
           pagination: {
             paginationModel: {
@@ -52,22 +43,19 @@ const dataTable = (props:Props) => {
             },
           },
         }}
-        slots={{toolbar:GridToolbar}}
+        slots={{ toolbar: GridToolbar }}
         slotProps={{
-          toolbar:{
-            showQuickFilter:true,
-            quickFilterProps:{debounceMs:500},
+          toolbar: {
+            showQuickFilter: true,
+            quickFilterProps: { debounceMs: 500 },
           },
         }}
-        pageSizeOptions={[5]}
-        checkboxSelection
-        disableRowSelectionOnClick
-        disableColumnFilter
-        disableDensitySelector
-        disableColumnSelector
+        pageSizeOptions={[10, 20, 50]} // Different page size options
+        checkboxSelection // Enable checkbox selection
+        disableRowSelectionOnClick // Avoid selecting rows when clicking on them
       />
     </div>
   );
 };
 
-export default dataTable;
+export default DataTable;
